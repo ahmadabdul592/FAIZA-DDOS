@@ -879,7 +879,7 @@ st.markdown("""
         font-family: 'Space Mono', monospace;
         letter-spacing: 1px;
     ">
-        © 2025 Faiza Muhammad Tukur. All rights reserved. &nbsp;™
+        © 2026 Faiza Muhammad Tukur. All rights reserved. &nbsp;™
     </div>
     <div style="
         margin-top: 0.8rem;
