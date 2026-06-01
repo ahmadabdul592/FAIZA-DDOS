@@ -6,7 +6,7 @@ import os
 import time
 import plotly.graph_objects as go
 import plotly.express as px
-from tensorflow.keras.models import load_model
+from keras.models import load_model
 
 # ── PAGE CONFIG ───────────────────────────────────────────────────────────────
 st.set_page_config(
@@ -156,12 +156,30 @@ html, body, [class*="css"] {
     color: var(--text-muted);
 }
 
-/* ── SIDEBAR ── */
+/* ── SIDEBAR — always visible, never collapses ── */
 section[data-testid="stSidebar"] {
     background: var(--bg-secondary) !important;
     border-right: 1px solid var(--border);
+    min-width: 280px !important;
+    max-width: 320px !important;
+    transform: none !important;
+    visibility: visible !important;
+    display: block !important;
 }
-section[data-testid="stSidebar"] .block-container { padding-top: 1rem; }
+section[data-testid="stSidebar"] .block-container {
+    padding-top: 1rem;
+    min-height: 100vh;
+}
+/* Hide the collapse arrow button */
+button[data-testid="collapsedControl"],
+[data-testid="stSidebarCollapseButton"] {
+    display: none !important;
+}
+/* Prevent sidebar from sliding off screen on re-render */
+section[data-testid="stSidebar"][aria-expanded="false"] {
+    margin-left: 0 !important;
+    transform: translateX(0) !important;
+}
 
 /* ── INPUTS ── */
 .stSlider > div > div { color: var(--accent-cyan) !important; }
@@ -366,6 +384,10 @@ if load_error:
     """)
     st.stop()
 
+# ── SESSION STATE — persists sidebar selection across reruns ─────────────────
+if 'selected_model' not in st.session_state:
+    st.session_state['selected_model'] = 'Hybrid RF-LSTM'
+
 # ── SIDEBAR ───────────────────────────────────────────────────────────────────
 with st.sidebar:
     st.markdown("""
@@ -380,10 +402,12 @@ with st.sidebar:
 
     st.markdown('<div class="section-header">⚙ Configuration</div>', unsafe_allow_html=True)
 
+    # key= ties selectbox to session_state so it survives every rerun
     selected_model = st.selectbox(
         "Detection Model",
         list(MODEL_INFO.keys()),
-        index=2,
+        index=list(MODEL_INFO.keys()).index(st.session_state['selected_model']),
+        key='selected_model',
         help="Hybrid RF-LSTM generally achieves the highest accuracy."
     )
 
@@ -409,6 +433,9 @@ with st.sidebar:
     <span class="model-chip chip-hybrid">Hybrid RF-LSTM</span> — best accuracy
     </div>
     """, unsafe_allow_html=True)
+
+# Read from session_state so value is always current
+selected_model = st.session_state['selected_model']
 
 # ── MAIN TABS ─────────────────────────────────────────────────────────────────
 tab1, tab2, tab3 = st.tabs(["  🔍  SINGLE FLOW  ", "  📂  BATCH ANALYSIS  ", "  📈  MODEL INSIGHTS  "])
